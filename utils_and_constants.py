@@ -6,7 +6,7 @@ DROP_COLNAMES = ["Date"]
 TARGET_COLUMN = "RainTomorrow"
 RAW_DATASET = "raw_dataset/weather.csv"
 PROCESSED_DATASET = "processed_dataset/weather.csv"
-RFC_FOREST_DEPTH = 2
+RFC_FOREST_DEPTH = 4
 
 
 def delete_and_recreate_dir(path):

@@ -1,0 +1,58 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python preprocess_dataset.py
+    deps:
+    - path: preprocess_dataset.py
+      hash: md5
+      md5: 4b1ce26f6abc25f88bf20360efd29cf3
+      size: 3326
+    - path: raw_dataset/weather.csv
+      hash: md5
+      md5: 8b80f6484630c3b5b0dacaabc37afaf0
+      size: 2726131
+    - path: utils_and_constants.py
+      hash: md5
+      md5: 179d6d80380ae4658f8c8e43ef1f7e06
+      size: 427
+    outs:
+    - path: processed_dataset/weather.csv
+      hash: md5
+      md5: 008e962e77cca08fa800d221609ba147
+      size: 10625724
+  train:
+    cmd: python train.py
+    deps:
+    - path: metrics_and_plots.py
+      hash: md5
+      md5: 5dec47c4cb8427c7a814892901252be9
+      size: 1023
+    - path: model.py
+      hash: md5
+      md5: ee2454ef369bab294e5615d9ace430dc
+      size: 1031
+    - path: processed_dataset/weather.csv
+      hash: md5
+      md5: 008e962e77cca08fa800d221609ba147
+      size: 10625724
+    - path: train.py
+      hash: md5
+      md5: 7cfdc69b63b827df83d3b24b33f0e4d3
+      size: 1133
+    - path: utils_and_constants.py
+      hash: md5
+      md5: 179d6d80380ae4658f8c8e43ef1f7e06
+      size: 427
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: 8f4e6b3175d1ff75a95ee1a85e8915fb
+      size: 76
+    - path: predictions.csv
+      hash: md5
+      md5: 8ac2269f6c54d799b4c2ff5e109f9342
+      size: 31278
+    - path: roc_curve.csv
+      hash: md5
+      md5: 74b1f19bde55eca8c3fb8090351af03c
+      size: 13605

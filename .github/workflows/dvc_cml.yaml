@@ -1,0 +1,68 @@
+name: DVC-CML-Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  # Needed to checkout the repository.
+  # CML needs `write` access to push plots to a temporary branch.
+  contents: write
+  # CML needs `write` access to create a PR comment.
+  pull-requests: write
+
+jobs:
+  train-and-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        # Fetch all history for all branches so DVC can compare with `main`.
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Cache Pip Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt # Make sure to have a requirements.txt
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v1
+
+      - name: Setup DVC
+        uses: iterative/setup-dvc@v1
+
+      - name: Cache DVC Data
+        uses: actions/cache@v3
+        with:
+          path: .dvc/cache
+          key: ${{ runner.os }}-dvc-${{ hashFiles('dvc.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-dvc-
+
+      - name: Run DVC pipeline
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: dvc repro
+
+      - name: Create CML Report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create a CML report with metrics
+          echo "## DVC Report" > metrics_compare.md
+          dvc metrics diff --md main >> metrics_compare.md
+
+          # Post the report as a comment on the PR
+          cml comment create metrics_compare.md
